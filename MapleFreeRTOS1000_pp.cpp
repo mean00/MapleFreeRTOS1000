@@ -61,9 +61,16 @@ bool xBinarySemaphore::take(int timeoutMs)
  bool xBinarySemaphore::giveFromInterrupt()
 {
   BaseType_t awake;
-  xAssert(xSemaphoreGiveFromISR(_handle,&awake)); // should never fail
-  return true;
+  return (xSemaphoreGiveFromISR(_handle,&awake)); // should never fail... 
 }
- 
+ /**
+  * 
+  * @param ms
+  */
+ void xDelay(int ms)
+ {
+      const TickType_t xDelay = 1+( ms/ portTICK_PERIOD_MS);
+      vTaskDelay(xDelay);
+ }
 
  //EOF

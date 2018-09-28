@@ -18,3 +18,5 @@ public:
 protected:
         SemaphoreHandle_t _handle;
 };
+
+void xDelay(int ms);
