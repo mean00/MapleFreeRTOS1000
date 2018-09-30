@@ -5,4 +5,8 @@ SET(MapleFreeRTOS1000_RECURSE True)
 
 To your CMakeLists.txt
 
+
+It also contains a very simple c++ wrapper on top of FreeRTOS to make
+the code more readblae
+
 NB, The logging/printf FreeRTOS functions are not mapped

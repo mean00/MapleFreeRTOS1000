@@ -3,7 +3,7 @@
  */
 
 #include "MapleFreeRTOS1000.h"
-
+#pragma once
 /**
  */
 class xBinarySemaphore
@@ -15,6 +15,19 @@ public:
         bool give();
         bool giveFromInterrupt();
   
+protected:
+        SemaphoreHandle_t _handle;
+};
+
+/**
+ * 
+ */
+class xMutex
+{
+public:
+              xMutex();
+        bool lock();
+        bool unlock();
 protected:
         SemaphoreHandle_t _handle;
 };

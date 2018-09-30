@@ -73,4 +73,20 @@ bool xBinarySemaphore::take(int timeoutMs)
       vTaskDelay(xDelay);
  }
 
+ 
+ xMutex::xMutex()
+ {
+     _handle=xSemaphoreCreateMutex();
+ }
+ bool xMutex::lock()
+ {
+    xAssert(xSemaphoreTake(_handle,portMAX_DELAY)); // should never fail
+    return true;
+ }
+ bool xMutex::unlock()
+ {
+    xAssert(xSemaphoreGive(_handle)); // should never fail
+    return true;
+ }
+ 
  //EOF
