@@ -33,3 +33,6 @@ protected:
 };
 
 void xDelay(int ms);
+
+extern void do_assert(const char *a);
+#define xAssert(a) if(!(a)) {do_assert(#a);}
