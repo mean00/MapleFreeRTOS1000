@@ -1,0 +1,11 @@
+
+SET(COMMON croutine.c  event_groups.c  list.c  queue.c  stream_buffer.c  tasks.c  timers.c)
+SET(PORT   port.c)
+SET(PORTNAME Stm32duino)
+FOREACH(in ${COMMON})
+    LIST(APPEND COMMON_EX Source/${in})
+ENDFOREACH(in ${COMMON})
+FOREACH(in ${PORT})
+    LIST(APPEND PORT_EX Source/portable/Stm32duino/${in})
+ENDFOREACH(in ${PORT})
+ADD_LIBRARY(FreeRTOS STATIC ${COMMON_EX} ${PORT_EX})
