@@ -4,7 +4,7 @@
 
 #include "MapleFreeRTOS1000_pp.h"
 
-void do_assert(const char *a)
+extern "C" void do_assert(const char *a)
 {
     
     Serial.println(a);
