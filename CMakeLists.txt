@@ -11,7 +11,8 @@ ENDFOREACH(in ${MEM})
 FOREACH(in ${PORT})
     LIST(APPEND PORT_EX Source/portable/Stm32duino/${in})
 ENDFOREACH(in ${PORT})
-generate_arduino_library(FreeRTOS 
+include_directories(Source/portable/Stm32duino)
+generate_arduino_library(${libPrefix}FreeRTOS 
                             SRCS ${COMMON_EX} ${PORT_EX} ${MEM_EX} MapleFreeRTOS1000_pp.cpp
                             BOARD ${ARDUINO_DEFAULT_BOARD}
                         )
