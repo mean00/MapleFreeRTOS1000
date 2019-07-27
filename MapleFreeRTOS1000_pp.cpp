@@ -6,8 +6,7 @@
 
 extern "C" void do_assert(const char *a)
 {
-    
-    Serial.println(a);
+     __asm__  ("bkpt 1");  
     while(1)
     {
         
