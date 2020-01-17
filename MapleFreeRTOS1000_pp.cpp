@@ -14,7 +14,13 @@ extern "C" void do_assert(const char *a)
     
 }
 #define xAssert(a) if(!(a)) {do_assert(#a);}
-
+/**
+ * 
+ */
+extern "C"   void vApplicationMallocFailedHook( void )
+{
+    do_assert("Malloc");
+}
 
 //-- Binary Semaphor --
 
