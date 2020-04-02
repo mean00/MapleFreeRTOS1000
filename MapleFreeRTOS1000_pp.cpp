@@ -66,7 +66,9 @@ bool xBinarySemaphore::take(int timeoutMs)
  bool xBinarySemaphore::giveFromInterrupt()
 {
   BaseType_t awake;
-  return (xSemaphoreGiveFromISR(_handle,&awake)); // should never fail... 
+  xSemaphoreGiveFromISR(_handle,&awake); // should never fail... 
+  portYIELD_FROM_ISR(awake); // reschedule
+  return true;
 }
  /**
   * 
@@ -81,16 +83,16 @@ bool xBinarySemaphore::take(int timeoutMs)
  
  xMutex::xMutex()
  {
-     _handle=xSemaphoreCreateMutex();
+     _handle=xSemaphoreCreateRecursiveMutex();
  }
  bool xMutex::lock()
  {
-    xAssert(xSemaphoreTake(_handle,portMAX_DELAY)); // should never fail
+    xAssert(xSemaphoreTakeRecursive(_handle,portMAX_DELAY)); // should never fail
     return true;
  }
  bool xMutex::unlock()
  {
-    xAssert(xSemaphoreGive(_handle)); // should never fail
+    xAssert(xSemaphoreGiveRecursive(_handle)); // should never fail
     return true;
  }
  
