@@ -18,6 +18,25 @@ public:
 protected:
         SemaphoreHandle_t _handle;
 };
+/**
+ * @brief 
+ * 
+ */
+class xTask
+{
+public:
+                        xTask(const char *name,  int priority=3, int taskSize=100);
+                virtual ~xTask();
+                virtual void run()=0; // Put your code here
+                static void Trampoline(void *param)
+                {
+                     xTask *tsk=(xTask *) param;
+                     tsk->run();
+                }
+
+protected:
+                TaskHandle_t    _taskHandle;
+};
 
 /**
  * 

@@ -95,5 +95,30 @@ bool xBinarySemaphore::take(int timeoutMs)
     xAssert(xSemaphoreGiveRecursive(_handle)); // should never fail
     return true;
  }
- 
+
+// Task
+/**
+ * @brief Construct a new x Task::X Task object
+ * 
+ * @param name 
+ * @param entryPoint 
+ * @param priority 
+ * @param taskSize 
+ */
+xTask::xTask(const char *name,  int priority, int taskSize)
+{
+    BaseType_t er=xTaskCreate(xTask::Trampoline,name,taskSize, this,priority,&_taskHandle);
+    xAssert(er==pdPASS);    
+}
+/**
+ * @brief Destroy the x Taskx Task object
+ * 
+ */
+xTask::~xTask()
+{
+  xAssert(0);
+}
+
+
+
  //EOF
