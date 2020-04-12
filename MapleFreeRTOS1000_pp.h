@@ -37,6 +37,22 @@ public:
 protected:
                 TaskHandle_t    _taskHandle;
 };
+/**
+ * 
+ */
+class xEventGroup
+{
+public:
+                xEventGroup();
+    virtual     ~xEventGroup();
+    void        setEvents(uint32_t events);
+    void        setEventsFromISR(uint32_t events);
+    uint32_t    waitEvents(uint32_t maskint, int timeout=0); //  the events are cleared upon return from here ! returns  0 if timeout
+    uint32_t    readEvents(uint32_t maskInt); // it is also cleared automatically !
+protected:
+    EventGroupHandle_t _handle;
+};
+
 
 /**
  * 
