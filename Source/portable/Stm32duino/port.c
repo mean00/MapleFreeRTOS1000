@@ -148,9 +148,17 @@ void vPortSVCHandler( void )
 	compatibility. */
 }
 /*-----------------------------------------------------------*/
+#define MSP_STACK_SIZE 256
+static uint32_t mspStack[MSP_STACK_SIZE]; // 265*4 bytes, should be enough (?)^M
 
 void vPortStartFirstTask( void )
 {
+    // Mean00 : Allocate a small buffer for the msp stack^M
+    uint32_t endOfStack=(uint32_t )mspStack;
+    endOfStack+=(MSP_STACK_SIZE-2)*4;
+    __asm volatile ("MSR msp, %0\n" : : "r" (endOfStack) : "sp");
+    // /mean00^M
+
 	/* The MSP stack is not reset as, unlike on M3/4 parts, there is no vector
 	table offset register that can be used to locate the initial stack value.
 	Not all M0 parts have the application vector table at address 0. */
