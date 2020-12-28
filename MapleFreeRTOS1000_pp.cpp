@@ -192,5 +192,93 @@ uint32_t    xEventGroup::readEvents(uint32_t maskInt) // it is also cleared auto
      return ev;
 
 }
+//--------------------------------
+/**
+ * 
+ */
+
+xFastEventGroup::xFastEventGroup() 
+{
+    _value = _mask = 0;
+}
+
+/**
+ * 
+ */
+xFastEventGroup::~xFastEventGroup() 
+{
+
+}
+/**
+ * 
+ * @param events
+ */
+void xFastEventGroup::setEvents(uint32_t events) {
+    vTaskSuspendAll();
+    _value = _value | events;
+    bool w = _value & _mask;
+    xTaskResumeAll();
+    if (w)
+        _sem.give();
+}
+/**
+ * 
+ * @param events
+ */
+void xFastEventGroup::setEventsFromISR(uint32_t events) {
+    vTaskSuspendAll();
+    _value = _value | events;
+    bool w = _value & _mask;
+    xTaskResumeAll();
+    if (w)
+        _sem.giveFromInterrupt();
+}
+/**
+ * 
+ * @param maskint
+ * @param timeout
+ * @return 
+ */
+uint32_t xFastEventGroup::waitEvents(uint32_t maskint, int timeout )
+{
+    vTaskSuspendAll();
+    uint32_t set = maskint & _value;
+    if (set) 
+    {
+        _value &= ~maskint;
+        xTaskResumeAll();
+        _mask=0;
+        return set;
+    }
+    _mask=maskint;
+    xTaskResumeAll(); // not atomic !
+    _sem.take(timeout);
+    vTaskSuspendAll();
+    set = maskint & _value;
+    if (set) 
+    {
+        _value &= ~maskint;
+    }
+    _mask=0;
+    xTaskResumeAll();
+    return set;
+}
+
+/**
+ * 
+ * @param maskInt
+ * @return 
+ */
+uint32_t xFastEventGroup::readEvents(uint32_t maskInt) 
+{
+    vTaskSuspendAll();
+    
+    uint32_t v = _value & maskInt;
+    _value &= ~maskInt;
+    _mask = 0;
+    xTaskResumeAll(); 
+    return v;
+}
+
 
  //EOF
