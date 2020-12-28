@@ -197,6 +197,9 @@ uint32_t    xEventGroup::readEvents(uint32_t maskInt) // it is also cleared auto
  * 
  */
 
+#define BEGIN_LOCK() taskENTER_CRITICAL()
+#define END_LOCK()   taskEXIT_CRITICAL()
+
 xFastEventGroup::xFastEventGroup() 
 {
     _value = _mask = 0;
@@ -214,10 +217,10 @@ xFastEventGroup::~xFastEventGroup()
  * @param events
  */
 void xFastEventGroup::setEvents(uint32_t events) {
-    vTaskSuspendAll();
+    BEGIN_LOCK();
     _value = _value | events;
     bool w = _value & _mask;
-    xTaskResumeAll();
+    END_LOCK();
     if (w)
         _sem.give();
 }
@@ -226,10 +229,8 @@ void xFastEventGroup::setEvents(uint32_t events) {
  * @param events
  */
 void xFastEventGroup::setEventsFromISR(uint32_t events) {
-    vTaskSuspendAll();
     _value = _value | events;
     bool w = _value & _mask;
-    xTaskResumeAll();
     if (w)
         _sem.giveFromInterrupt();
 }
@@ -241,26 +242,26 @@ void xFastEventGroup::setEventsFromISR(uint32_t events) {
  */
 uint32_t xFastEventGroup::waitEvents(uint32_t maskint, int timeout )
 {
-    vTaskSuspendAll();
+    BEGIN_LOCK();
     uint32_t set = maskint & _value;
     if (set) 
     {
-        _value &= ~maskint;
-        xTaskResumeAll();
-        _mask=0;
+        _value &= ~set;
+        _mask=0;        
+        END_LOCK();
         return set;
     }
     _mask=maskint;
-    xTaskResumeAll(); // not atomic !
+    END_LOCK(); // not atomic !
     _sem.take(timeout);
-    vTaskSuspendAll();
+    BEGIN_LOCK();
     set = maskint & _value;
     if (set) 
     {
-        _value &= ~maskint;
+        _value &= ~set;
     }
     _mask=0;
-    xTaskResumeAll();
+    END_LOCK();
     return set;
 }
 
@@ -271,12 +272,11 @@ uint32_t xFastEventGroup::waitEvents(uint32_t maskint, int timeout )
  */
 uint32_t xFastEventGroup::readEvents(uint32_t maskInt) 
 {
-    vTaskSuspendAll();
-    
+    BEGIN_LOCK();    
     uint32_t v = _value & maskInt;
     _value &= ~maskInt;
     _mask = 0;
-    xTaskResumeAll(); 
+    END_LOCK(); 
     return v;
 }
 
