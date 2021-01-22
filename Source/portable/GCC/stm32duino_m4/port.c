@@ -123,6 +123,19 @@ void vPortSetupTimerInterrupt( void );
 void xPortPendSVHandler( void ) __attribute__( ( naked ) );
 void xPortSysTickHandler( void );
 void vPortSVCHandler( void ) __attribute__( ( naked ) );
+// MEANX Map FreeRTOS exception to STM32duino naming
+// The original mapple port is available here
+// http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-ide/maple-ide-0.0.12-src/libraries/FreeRTOS/utility/port.c
+
+#define vPortSVCHandler     __exc_svc
+#define xPortPendSVHandler  __exc_pendsv
+// MEANX
+/*
+ * Exception handlers.
+ */
+void xPortPendSVHandler( void ) __attribute__( ( naked ) );
+void xPortSysTickHandler( void );
+void vPortSVCHandler( void ) __attribute__( ( naked ) );
 
 /*
  * Start first task is a separate function so it can be tested in isolation.
@@ -260,9 +273,20 @@ void vPortSVCHandler( void )
         );
 }
 /*-----------------------------------------------------------*/
-
+// MEANX
+#define MSP_STACK_SIZE 256
+static uint32_t mspStack[MSP_STACK_SIZE]; // 265*4 bytes, should be enough (?)^M
+// / MEANX
 static void prvPortStartFirstTask( void )
 {
+    // MEANX    
+     // Mean00 : Allocate a small buffer for the msp stack^M
+    uint32_t endOfStack=(uint32_t )mspStack;
+    endOfStack+=(MSP_STACK_SIZE-2)*4;
+    __asm volatile ("MSR msp, %0\n" : : "r" (endOfStack) : "sp");
+// / MEANX    
+    
+    
     /* Start the first task.  This also clears the bit that indicates the FPU is
      * in use in case the FPU was used before the scheduler was started - which
      * would otherwise result in the unnecessary leaving of space in the SVC stack
@@ -680,7 +704,7 @@ void xPortSysTickHandler( void )
 
 #endif /* #if configUSE_TICKLESS_IDLE */
 /*-----------------------------------------------------------*/
-
+#if 0 // MEANX
 /*
  * Setup the systick timer to generate the tick interrupts at the required
  * frequency.
@@ -704,6 +728,13 @@ __attribute__( ( weak ) ) void vPortSetupTimerInterrupt( void )
     portNVIC_SYSTICK_LOAD_REG = ( configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ ) - 1UL;
     portNVIC_SYSTICK_CTRL_REG = ( portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT );
 }
+#else // MEANX
+
+void vPortSetupTimerInterrupt( void )
+{
+    systick_attach_callback(&xPortSysTickHandler);
+}
+#endif
 /*-----------------------------------------------------------*/
 
 /* This is a naked function. */
