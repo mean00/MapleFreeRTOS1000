@@ -292,10 +292,12 @@ static void prvPortStartFirstTask( void )
      * would otherwise result in the unnecessary leaving of space in the SVC stack
      * for lazy saving of FPU registers. */
     __asm volatile (
+#if 0  // MEANX : done above   
         " ldr r0, =0xE000ED08 	\n"/* Use the NVIC offset register to locate the stack. */
         " ldr r0, [r0] 			\n"
         " ldr r0, [r0] 			\n"
         " msr msp, r0			\n"/* Set the msp back to the start of the stack. */
+#endif    
         " mov r0, #0			\n"/* Clear the bit that indicates the FPU is in use, see comment above. */
         " msr control, r0		\n"
         " cpsie i				\n"/* Globally enable interrupts. */

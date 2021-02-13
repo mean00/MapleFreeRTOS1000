@@ -21,7 +21,7 @@ void vApplicationStackOverflowHook(TaskHandle_t pxTask,
 
     (void) pxTask;
     (void) pcTaskName;
-    do_assert("stackOverFlow");
+    do_assert(pcTaskName);
            ;
 }
 
