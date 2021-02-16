@@ -57,6 +57,26 @@ protected:
 /**
  * 
  */
+class xFastEventGroup
+{
+public:
+                xFastEventGroup();
+    virtual     ~xFastEventGroup();
+    void        setEvents(uint32_t events);
+    void        setEventsFromISR(uint32_t events);
+    uint32_t    waitEvents(uint32_t maskint, int timeout=0); //  the events are cleared upon return from here ! returns  0 if timeout
+    uint32_t    readEvents(uint32_t maskInt); // it is also cleared automatically !
+protected:
+    uint32_t    _value;
+    uint32_t    _mask;
+    xBinarySemaphore _sem;
+};
+
+
+
+/**
+ * 
+ */
 class xMutex
 {
 public:
@@ -66,6 +86,20 @@ public:
 protected:
         SemaphoreHandle_t _handle;
 };
+/**
+ */
+class xQueueEvent
+{
+public:
+            xQueueEvent(int nbSlots);
+    virtual ~xQueueEvent();
+    void    post(uint32_t event);
+    void    get(int timeOut, uint32_t &event);
+    bool    empty();    
+protected:    
+     QueueHandle_t _q;
+};
+
 
 void xDelay(int ms);
 

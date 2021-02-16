@@ -192,5 +192,137 @@ uint32_t    xEventGroup::readEvents(uint32_t maskInt) // it is also cleared auto
      return ev;
 
 }
+//--------------------------------
+/**
+ * 
+ */
+
+#define BEGIN_LOCK() taskENTER_CRITICAL()
+#define END_LOCK()   taskEXIT_CRITICAL()
+
+xFastEventGroup::xFastEventGroup() 
+{
+    _value = _mask = 0;
+}
+
+/**
+ * 
+ */
+xFastEventGroup::~xFastEventGroup() 
+{
+
+}
+/**
+ * 
+ * @param events
+ */
+void xFastEventGroup::setEvents(uint32_t events) {
+    BEGIN_LOCK();
+    _value = _value | events;
+    bool w = _value & _mask;
+    END_LOCK();
+    if (w)
+        _sem.give();
+}
+/**
+ * 
+ * @param events
+ */
+void xFastEventGroup::setEventsFromISR(uint32_t events) {
+    _value = _value | events;
+    bool w = _value & _mask;
+    if (w)
+        _sem.giveFromInterrupt();
+}
+/**
+ * 
+ * @param maskint
+ * @param timeout
+ * @return 
+ */
+uint32_t xFastEventGroup::waitEvents(uint32_t maskint, int timeout )
+{
+    BEGIN_LOCK();
+    uint32_t set = maskint & _value;
+    if (set) 
+    {
+        _value &= ~set;
+        _mask=0;        
+        END_LOCK();
+        return set;
+    }
+    _mask=maskint;
+    END_LOCK(); // not atomic !
+    _sem.take(timeout);
+    BEGIN_LOCK();
+    set = maskint & _value;
+    if (set) 
+    {
+        _value &= ~set;
+    }
+    _mask=0;
+    END_LOCK();
+    return set;
+}
+
+/**
+ * 
+ * @param maskInt
+ * @return 
+ */
+uint32_t xFastEventGroup::readEvents(uint32_t maskInt) 
+{
+    BEGIN_LOCK();    
+    uint32_t v = _value & maskInt;
+    _value &= ~maskInt;
+    _mask = 0;
+    END_LOCK(); 
+    return v;
+}
+/**
+ * 
+ * @param nbSlots
+ */
+xQueueEvent::xQueueEvent(int nbSlots)
+{
+    _q=xQueueCreate(nbSlots,4);    
+    xAssert(_q);
+}
+/**
+ * 
+ */
+xQueueEvent::~xQueueEvent()
+{
+    
+}
+/**
+ * 
+ * @param event
+ */
+void    xQueueEvent::post(uint32_t event)
+{
+    if(pdPASS!=xQueueSend(_q,(void*)event,1))
+        xAssert(0);
+}
+/**
+ * 
+ * @param timeOut
+ * @param event
+ */
+void    xQueueEvent::get(int timeOut, uint32_t &event)
+{
+    if(pdPASS!=xQueueReceive(_q,&event,timeOut))
+        xAssert(0);
+
+}
+/**
+ * 
+ * @return 
+ */
+bool    xQueueEvent::empty()
+{
+    if(!uxQueueMessagesWaiting( _q )) return true;
+    return false;
+}
 
  //EOF
