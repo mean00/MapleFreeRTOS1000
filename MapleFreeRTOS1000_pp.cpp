@@ -301,7 +301,7 @@ xQueueEvent::~xQueueEvent()
  */
 void    xQueueEvent::post(uint32_t event)
 {
-    if(pdPASS!=xQueueSend(_q,(void*)event,1))
+    if(pdPASS!=xQueueSend(_q,&event,1))
         xAssert(0);
 }
 /**
